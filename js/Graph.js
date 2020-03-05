@@ -102,8 +102,12 @@ var Graph = /** @class */ (function () {
             if (e.target === _this.canvas && !preventClick) {
                 var clickedSong = Math.floor((e.offsetX + initialDelta) / _this.stepSize);
                 _this.songs.forEach(function (song) { return (song.active = false); });
-                _this.songs[clickedSong].active = true;
-                _this.detailInfos = _this.songs[clickedSong];
+                if (e.offsetY >
+                    _this.canvasSize.height -
+                        _this.timeStringToSeconds(_this.songs[clickedSong].duration)) {
+                    _this.songs[clickedSong].active = true;
+                    _this.detailInfos = _this.songs[clickedSong];
+                }
             }
             preventClick = false;
         });

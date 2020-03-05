@@ -84,8 +84,15 @@ class Graph {
           (e.offsetX + initialDelta) / this.stepSize
         );
         this.songs.forEach(song => (song.active = false));
-        this.songs[clickedSong].active = true;
-        this.detailInfos = this.songs[clickedSong];
+
+        if (
+          e.offsetY >
+          this.canvasSize.height -
+            this.timeStringToSeconds(this.songs[clickedSong].duration)
+        ) {
+          this.songs[clickedSong].active = true;
+          this.detailInfos = this.songs[clickedSong];
+        }
       }
 
       preventClick = false;
