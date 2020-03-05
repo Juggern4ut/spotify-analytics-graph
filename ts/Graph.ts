@@ -29,6 +29,8 @@ class Graph {
   initTime: number;
   deltaTime: number;
   calculatedFps: number;
+  longestDuration: number;
+  scaleY: number;
 
   constructor() {
     this.loadData();
@@ -52,6 +54,8 @@ class Graph {
       start: 0,
       end: this.canvasSize.width
     };
+
+    this.scaleY = this.canvasSize.height / this.longestDuration;
 
     this.startDrawingInterval();
     this.changeViewport();
@@ -88,7 +92,8 @@ class Graph {
         if (
           e.offsetY >
           this.canvasSize.height -
-            this.timeStringToSeconds(this.songs[clickedSong].duration)
+            this.timeStringToSeconds(this.songs[clickedSong].duration) *
+              this.scaleY
         ) {
           this.songs[clickedSong].active = true;
           this.detailInfos = this.songs[clickedSong];
@@ -152,6 +157,13 @@ class Graph {
   loadData = async () => {
     let response = await fetch("/res/liked_songs.json");
     this.songs = await response.json();
+
+    this.songs.forEach(song => {
+      let dur = this.timeStringToSeconds(song.duration);
+      this.longestDuration =
+        this.longestDuration > dur ? this.longestDuration : dur;
+    });
+
     this.init();
   };
 
@@ -160,7 +172,7 @@ class Graph {
    * bar based of the length of the song
    */
   drawDurationGraph(): void {
-    this.stepSize = 5;
+    this.stepSize = 15;
     let x = 0;
     let infoX = 0;
     let infoY = 0;
@@ -182,16 +194,19 @@ class Graph {
 
       this.ctx.fillRect(
         x,
-        this.canvasSize.height - height,
+        this.canvasSize.height - height * this.scaleY,
         this.stepSize,
-        height
+        height * this.scaleY
       );
 
       x += this.stepSize;
     }
 
     if (drawInfo) {
-      this.drawDetailBubble(infoX, this.canvasSize.height - infoY - 100);
+      this.drawDetailBubble(
+        infoX,
+        (this.canvasSize.height - infoY - 20) * this.scaleY
+      );
     }
   }
 

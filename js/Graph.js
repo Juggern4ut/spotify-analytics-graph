@@ -44,6 +44,7 @@ var Graph = /** @class */ (function () {
          */
         this.loadData = function () { return __awaiter(_this, void 0, void 0, function () {
             var response, _a;
+            var _this = this;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0: return [4 /*yield*/, fetch("/res/liked_songs.json")];
@@ -53,6 +54,11 @@ var Graph = /** @class */ (function () {
                         return [4 /*yield*/, response.json()];
                     case 2:
                         _a.songs = _b.sent();
+                        this.songs.forEach(function (song) {
+                            var dur = _this.timeStringToSeconds(song.duration);
+                            _this.longestDuration =
+                                _this.longestDuration > dur ? _this.longestDuration : dur;
+                        });
                         this.init();
                         return [2 /*return*/];
                 }
@@ -76,6 +82,7 @@ var Graph = /** @class */ (function () {
             start: 0,
             end: this.canvasSize.width
         };
+        this.scaleY = this.canvasSize.height / this.longestDuration;
         this.startDrawingInterval();
         this.changeViewport();
         this.updateFps();
@@ -104,7 +111,8 @@ var Graph = /** @class */ (function () {
                 _this.songs.forEach(function (song) { return (song.active = false); });
                 if (e.offsetY >
                     _this.canvasSize.height -
-                        _this.timeStringToSeconds(_this.songs[clickedSong].duration)) {
+                        _this.timeStringToSeconds(_this.songs[clickedSong].duration) *
+                            _this.scaleY) {
                     _this.songs[clickedSong].active = true;
                     _this.detailInfos = _this.songs[clickedSong];
                 }
@@ -156,7 +164,7 @@ var Graph = /** @class */ (function () {
      * bar based of the length of the song
      */
     Graph.prototype.drawDurationGraph = function () {
-        this.stepSize = 5;
+        this.stepSize = 15;
         var x = 0;
         var infoX = 0;
         var infoY = 0;
@@ -175,11 +183,11 @@ var Graph = /** @class */ (function () {
             else {
                 this.ctx.fillStyle = "red";
             }
-            this.ctx.fillRect(x, this.canvasSize.height - height, this.stepSize, height);
+            this.ctx.fillRect(x, this.canvasSize.height - height * this.scaleY, this.stepSize, height * this.scaleY);
             x += this.stepSize;
         }
         if (drawInfo) {
-            this.drawDetailBubble(infoX, this.canvasSize.height - infoY - 100);
+            this.drawDetailBubble(infoX, (this.canvasSize.height - infoY - 20) * this.scaleY);
         }
     };
     /**
