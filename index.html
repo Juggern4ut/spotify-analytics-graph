@@ -12,14 +12,22 @@
       }
       #canvas{
         border: 1px solid #dedede;
-        margin: 50px auto;
         display: block;
         background-color: #fff;
         box-shadow: 15px 15px 15px rgba(0,0,0,0.2);
+        margin-bottom: 50px;
+      }
+
+      #container{
+        margin: 50px auto;
+        width: 1000px;
       }
     </style>
   </head>
   <body>
-    <canvas width="1000" height="500" id="canvas"></canvas>
+    <div id="container">
+      <canvas width="1000" height="500" id="canvas"></canvas>
+      <input type="checkbox" id="stress"><label for="stress">Stress the CPU to simulate FPS-Drop?</label>
+    </div>
   </body>
 </html>

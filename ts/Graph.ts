@@ -169,6 +169,7 @@ class Graph {
     this.drawDurationGraph();
     this.drawScrollPercentage();
     this.drawFps();
+
     if (this.dropFps) {
       this.overload();
     }
@@ -319,7 +320,7 @@ class Graph {
    * to stress the CPU and drop the FPS
    * Call this in the draw() function
    */
-  overload() {
+  overload(): void {
     this.songs.forEach(song => {
       for (let i = 0; i < 100; i++) {
         let sqrt = Math.sqrt(this.timeStringToSeconds(song.duration));
