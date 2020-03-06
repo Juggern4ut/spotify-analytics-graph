@@ -101,6 +101,10 @@ class Graph {
       this.visibleRange.end = Math.floor(stepsPerViewPort + delta);
 
       initialDelta = delta * this.stepSize;
+
+      this.scrollPercentage = Math.round(
+        (delta / (this.songs.length - stepsPerViewPort)) * 100
+      );
     });
 
     document.addEventListener("mouseup", e => {
@@ -273,6 +277,8 @@ class Graph {
    * @returns {number} The time in seconds
    */
   timeStringToSeconds(timeString: string): number {
+    let regex = /^([0-9]|[0-9]{2})[:][0-5][0-9]$/;
+    if (!regex.test(timeString)) return 0;
     let total = 0;
     let tmp = timeString.split(":");
     total += parseInt(tmp[0]) * 60;
@@ -285,12 +291,25 @@ class Graph {
    * the top left of the graph
    */
   drawFps(): void {
+    let color : string;
     if (this.calculatedFps > 30) {
-      this.ctx.fillStyle = "#000";
+      color = "#15871D";
     } else {
-      this.ctx.fillStyle = "#FF4F19";
+      color = "#FF4F19";
     }
+    this.ctx.fillStyle = color;
+
     this.ctx.fillText("FPS: " + this.calculatedFps, 5, 12);
+    
+    this.ctx.fillStyle = "#000";
+    this.ctx.fillRect(60, 4, 102, 10);
+
+    this.ctx.fillStyle = "#fff";
+    this.ctx.fillRect(61, 5, 100, 8);
+
+    this.ctx.fillStyle = color;
+    let fpsWidth = this.calculatedFps / this.fps * 100
+    this.ctx.fillRect(61, 5, fpsWidth, 8);
   }
 
   /**
@@ -300,6 +319,14 @@ class Graph {
   drawScrollPercentage(): void {
     this.ctx.fillStyle = "#000";
     this.ctx.fillText(this.scrollPercentage + "%", 5, 25);
+
+    this.ctx.fillRect(60, 16, 102, 10);
+
+    this.ctx.fillStyle = "#fff";
+    this.ctx.fillRect(61, 17, 100, 8);
+
+    this.ctx.fillStyle = "#0B0284";
+    this.ctx.fillRect(61, 17, this.scrollPercentage, 8);
   }
 
   /**
