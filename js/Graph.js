@@ -37,7 +37,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 var Graph = /** @class */ (function () {
     function Graph() {
         var _this = this;
-        this.fps = 120;
+        this.fps = 60;
+        this.calculatedFps = 60;
         this.stepSize = 1;
         this.scrollPercentage = 0;
         /**
@@ -255,7 +256,12 @@ var Graph = /** @class */ (function () {
      * the top left of the graph
      */
     Graph.prototype.drawFps = function () {
-        this.ctx.fillStyle = "#000";
+        if (this.calculatedFps > 30) {
+            this.ctx.fillStyle = "#000";
+        }
+        else {
+            this.ctx.fillStyle = "#FF4F19";
+        }
         this.ctx.fillText("FPS: " + this.calculatedFps, 5, 12);
     };
     /**

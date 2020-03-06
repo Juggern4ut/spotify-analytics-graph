@@ -22,8 +22,8 @@ class Graph {
   canvasSize: CanvasSize;
   songs: Song[];
   visibleRange: VisibleRange;
-  fps: number = 120;
-  calculatedFps: number;
+  fps: number = 60;
+  calculatedFps: number = 60;
   drawingInterval: number;
   stepSize: number = 1;
   detailInfos: Object;
@@ -285,7 +285,11 @@ class Graph {
    * the top left of the graph
    */
   drawFps(): void {
-    this.ctx.fillStyle = "#000";
+    if(this.calculatedFps > 30){
+      this.ctx.fillStyle = "#000";
+    }else{
+      this.ctx.fillStyle = "#FF4F19";
+    }
     this.ctx.fillText("FPS: " + this.calculatedFps, 5, 12);
   }
 
