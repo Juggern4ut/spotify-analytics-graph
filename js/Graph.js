@@ -38,6 +38,13 @@ var Graph = /** @class */ (function () {
     function Graph() {
         var _this = this;
         this.fps = 120;
+        this.stepSize = 1;
+        this.scrollPercentage = 0;
+        /**
+         * If true, will call the overload function
+         * on each frame to stress the cpu
+         */
+        this.dropFps = false;
         /**
          * Get the JSON data and save
          * it in the property
@@ -103,6 +110,20 @@ var Graph = /** @class */ (function () {
             dragging = true;
             initialX = e.pageX;
         });
+        this.canvas.addEventListener("wheel", function (e) {
+            if (e.deltaY > 0) {
+                _this.stepSize = _this.stepSize > 1 ? _this.stepSize - 1 : _this.stepSize;
+            }
+            else {
+                _this.stepSize++;
+            }
+            var stepsPerViewPort = _this.canvasSize.width / _this.stepSize;
+            var maxDelta = _this.songs.length - stepsPerViewPort;
+            delta = delta > maxDelta ? maxDelta : delta;
+            _this.visibleRange.start = Math.floor(delta);
+            _this.visibleRange.end = Math.floor(stepsPerViewPort + delta);
+            initialDelta = delta * _this.stepSize;
+        });
         document.addEventListener("mouseup", function (e) {
             dragging = false;
             initialDelta = delta * _this.stepSize;
@@ -130,6 +151,7 @@ var Graph = /** @class */ (function () {
             delta = delta > maxDelta ? maxDelta : delta;
             _this.visibleRange.start = Math.floor(delta);
             _this.visibleRange.end = Math.floor(stepsPerViewPort + delta);
+            _this.scrollPercentage = Math.round((delta / (_this.songs.length - stepsPerViewPort)) * 100);
         });
     };
     /**
@@ -150,7 +172,11 @@ var Graph = /** @class */ (function () {
     Graph.prototype.draw = function () {
         this.clear();
         this.drawDurationGraph();
+        this.drawScrollPercentage();
         this.drawFps();
+        if (this.dropFps) {
+            this.overload();
+        }
     };
     /**
      * Clear the whole canvas for the next
@@ -164,7 +190,6 @@ var Graph = /** @class */ (function () {
      * bar based of the length of the song
      */
     Graph.prototype.drawDurationGraph = function () {
-        this.stepSize = 15;
         var x = 0;
         var infoX = 0;
         var infoY = 0;
@@ -234,6 +259,14 @@ var Graph = /** @class */ (function () {
         this.ctx.fillText("FPS: " + this.calculatedFps, 5, 12);
     };
     /**
+     * Will draw the percentage scrolled at
+     * the top left of the graph
+     */
+    Graph.prototype.drawScrollPercentage = function () {
+        this.ctx.fillStyle = "#000";
+        this.ctx.fillText(this.scrollPercentage + "%", 5, 25);
+    };
+    /**
      * Since the FPS should not be updated every
      * frame, this external interval is used to
      * update the FPS every 300ms
@@ -248,6 +281,22 @@ var Graph = /** @class */ (function () {
                     ? _this.fps
                     : Math.round(_this.calculatedFps);
         }, 300);
+    };
+    /**
+     * Only used for testing the FPS display
+     * Will make some nonesense calculations
+     * to stress the CPU and drop the FPS
+     * Call this in the draw() function
+     */
+    Graph.prototype.overload = function () {
+        var _this = this;
+        this.songs.forEach(function (song) {
+            for (var i = 0; i < 100; i++) {
+                var sqrt = Math.sqrt(_this.timeStringToSeconds(song.duration));
+                var round = Math.round(sqrt);
+                var sum = (sqrt + round) / 100;
+            }
+        });
     };
     return Graph;
 }());

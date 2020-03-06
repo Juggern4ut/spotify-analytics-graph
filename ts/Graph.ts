@@ -17,20 +17,27 @@ interface VisibleRange {
 }
 
 class Graph {
-  songs: Song[];
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
   canvasSize: CanvasSize;
+  songs: Song[];
   visibleRange: VisibleRange;
   fps: number = 120;
+  calculatedFps: number;
   drawingInterval: number;
-  stepSize: number;
+  stepSize: number = 1;
   detailInfos: Object;
   initTime: number;
   deltaTime: number;
-  calculatedFps: number;
   longestDuration: number;
+  scrollPercentage: number = 0;
   scaleY: number;
+
+  /**
+   * If true, will call the overload function
+   * on each frame to stress the cpu
+   */
+  dropFps: boolean = false;
 
   constructor() {
     this.loadData();
@@ -79,6 +86,23 @@ class Graph {
       initialX = e.pageX;
     });
 
+    this.canvas.addEventListener("wheel", e => {
+      if (e.deltaY > 0) {
+        this.stepSize = this.stepSize > 1 ? this.stepSize - 1 : this.stepSize;
+      } else {
+        this.stepSize++;
+      }
+
+      let stepsPerViewPort = this.canvasSize.width / this.stepSize;
+      let maxDelta = this.songs.length - stepsPerViewPort;
+      delta = delta > maxDelta ? maxDelta : delta;
+
+      this.visibleRange.start = Math.floor(delta);
+      this.visibleRange.end = Math.floor(stepsPerViewPort + delta);
+
+      initialDelta = delta * this.stepSize;
+    });
+
     document.addEventListener("mouseup", e => {
       dragging = false;
       initialDelta = delta * this.stepSize;
@@ -118,6 +142,10 @@ class Graph {
 
       this.visibleRange.start = Math.floor(delta);
       this.visibleRange.end = Math.floor(stepsPerViewPort + delta);
+
+      this.scrollPercentage = Math.round(
+        (delta / (this.songs.length - stepsPerViewPort)) * 100
+      );
     });
   }
 
@@ -139,7 +167,11 @@ class Graph {
   draw(): void {
     this.clear();
     this.drawDurationGraph();
+    this.drawScrollPercentage();
     this.drawFps();
+    if (this.dropFps) {
+      this.overload();
+    }
   }
 
   /**
@@ -172,7 +204,6 @@ class Graph {
    * bar based of the length of the song
    */
   drawDurationGraph(): void {
-    this.stepSize = 15;
     let x = 0;
     let infoX = 0;
     let infoY = 0;
@@ -258,6 +289,15 @@ class Graph {
   }
 
   /**
+   * Will draw the percentage scrolled at
+   * the top left of the graph
+   */
+  drawScrollPercentage(): void {
+    this.ctx.fillStyle = "#000";
+    this.ctx.fillText(this.scrollPercentage + "%", 5, 25);
+  }
+
+  /**
    * Since the FPS should not be updated every
    * frame, this external interval is used to
    * update the FPS every 300ms
@@ -271,5 +311,21 @@ class Graph {
           ? this.fps
           : Math.round(this.calculatedFps);
     }, 300);
+  }
+
+  /**
+   * Only used for testing the FPS display
+   * Will make some nonesense calculations
+   * to stress the CPU and drop the FPS
+   * Call this in the draw() function
+   */
+  overload() {
+    this.songs.forEach(song => {
+      for (let i = 0; i < 100; i++) {
+        let sqrt = Math.sqrt(this.timeStringToSeconds(song.duration));
+        let round = Math.round(sqrt);
+        let sum = (sqrt + round) / 100;
+      }
+    });
   }
 }
