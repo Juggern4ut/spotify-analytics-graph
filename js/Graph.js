@@ -37,8 +37,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 var Graph = /** @class */ (function () {
     function Graph() {
         var _this = this;
-        this.fps = 60;
-        this.calculatedFps = 60;
+        this.fps = 120;
+        this.calculatedFps = 120;
         this.stepSize = 1;
         this.scrollPercentage = 0;
         /**
@@ -281,7 +281,7 @@ var Graph = /** @class */ (function () {
         var _this = this;
         setInterval(function () {
             _this.deltaTime = _this.deltaTime <= 0 ? 0 : _this.deltaTime;
-            _this.calculatedFps = 60 / ((_this.deltaTime * _this.fps) / 1000);
+            _this.calculatedFps = _this.fps / ((_this.deltaTime * _this.fps) / 1000);
             _this.calculatedFps =
                 _this.calculatedFps > _this.fps
                     ? _this.fps
